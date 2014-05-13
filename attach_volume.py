@@ -57,14 +57,6 @@ class TheStretcher:
         self.ec2_connect()
         self.sns_connect()
         self.get_instance()
-        self.stop_instance()
-        self.get_attached_volumes()
-        self.snapshot_ebs_volume()
-        self.check_snapshot_availability()
-        self.create_new_volume_from_snapshot()
-        self.check_new_volume_availability()
-        self.detach_old_volume()
-        self.check_detached_old_volume()
         self.attach_new_volume_to_instance()
         self.delete_snapshot()
         self.delete_old_volume()
@@ -145,7 +137,7 @@ class TheStretcher:
             curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
 
     def attach_new_volume_to_instance(self):
-        self.conn.attach_volume(self.new_ebs.id, self.ec2_instance_id, self.disk_partition)
+        self.conn.attach_volume('vol-9ac6e89e', self.ec2_instance_id, self.disk_partition)
 
     def snapshot_ebs_volume(self):
         self.snapshot = self.conn.create_snapshot(self.old_ebs.id, 'TheStretcher Volume Snapshot')
