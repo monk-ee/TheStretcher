@@ -1,0 +1,10 @@
+general:
+ region            : 'ap-southeast-2'
+ format: 'standard'
+ filter: 'TimeStartStop'
+ time_zone: 'Australia/Brisbane'
+ debug: False
+ threshold: 300
+ sns_topic:
+ shutdown_untagged: True
+ logfile: 'thestretcher.log'

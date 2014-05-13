@@ -1,0 +1,10 @@
+general:
+ region            : 'ap-southeast-2'
+ format: 'standard'
+ filter: 'TimeStartStop'
+ time_zone: 'Australia/Brisbane'
+ debug: True
+ threshold: 300
+ sns_topic: 'arn:aws:sns:ap-southeast-2:947176597464:TheSleeperAlerts'
+ shutdown_untagged: True
+ logfile: 'thestretcher.log'
