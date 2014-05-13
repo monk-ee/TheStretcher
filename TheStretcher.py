@@ -63,6 +63,7 @@ class TheStretcher:
         self.check_snapshot_availability()
         self.create_volume_from_snapshot()
         self.check_volume_availability()
+        self.detach_old_volume()
         self.attach_volume_to_instance()
         self.delete_snapshot()
         self.delete_old_volume()
@@ -160,6 +161,9 @@ class TheStretcher:
         while curr_snapshot.status != 'completed':
             time.sleep(10)
             curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
+
+    def detach_old_volume(self):
+        self.conn.detach_volume(self.old_ebs.id,self.ec2_instance_id,self.disk_partition)
 
     def get_attached_volumes(self):
         filters = {'attachment.instance-id': self.ec2_instance_id}
