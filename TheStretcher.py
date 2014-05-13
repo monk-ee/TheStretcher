@@ -69,7 +69,7 @@ class TheStretcher:
         self.delete_snapshot()
         self.delete_old_volume()
         self.start_instance()
-        #self.sns_message()
+        self.sns_message()
 
     def load_configuration(self):
         try:
@@ -123,15 +123,17 @@ class TheStretcher:
 
     def sns_message(self):
         message = ""
-
-        for item in self.sns_start:
-            message += "Started Instance:" + item + "\n"
         for item in self.sns_stop:
             message += "Stopped Instance:" + item + "\n"
 
+        message += "Stretched " + self.disk_partition + " to " + self.disk_size + "GB \n"
+
+        for item in self.sns_start:
+            message += "Started Instance:" + item + "\n"
+
         if message != "":
             try:
-                self.snsconn.publish(self.config['general']['sns_topic'], message, "TheSleeper was invoked")
+                self.snsconn.publish(self.config['general']['sns_topic'], message, "TheStretcher was invoked")
             except:
                 pass
 
@@ -175,6 +177,7 @@ class TheStretcher:
         exit("No volumes found matching that mount point.")
 
     def check_detached_old_volume(self):
+        #it seems you have to wait just a little for the dang thing to detach
         time.sleep(15)
 
 if __name__ == "__main__":
