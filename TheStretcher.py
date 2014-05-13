@@ -19,7 +19,7 @@ __email__ = "magic.monkee.magic@gmail.com"
 __status__ = "Development"
 
 import boto.ec2, boto.sns
-import yaml, sys,logging,time,os
+import yaml, sys,logging,time,os,re
 
 
 class TheStretcher:
@@ -51,7 +51,7 @@ class TheStretcher:
             self.disk_size = argv[3]
         except BaseException as emsg:
             sys.exit("Missing arguments" + str(emsg))
-
+        self.check_arguments()
         self.load_configuration()
         self.set_timezone()
         self.ec2_connect()
@@ -82,6 +82,20 @@ class TheStretcher:
         except:
             raise
             exit("Unexpected error:" + str(sys.exc_info()[0]))
+
+    def check_arguments(self):
+        match_instance_id = re.match('^(i\-[A-Fa-f0-9]*)$', self.ec2_instance_id)
+        if not match_instance_id:
+            exit("Instance Id needs to be in the i-xxxxxx format.")
+
+        if self.disk_partition == "":
+            exit("Disk partition required eg. /dev/sda1,/dev/sdb,xvdf")
+
+        try:
+            if (int(self.disk_size)%1 != 0):
+                exit("Disk size needs to be a whole number (in GB).")
+        except:
+             exit("Disk size needs to be an integer (in GB).")
 
     def set_timezone(self):
         try:
