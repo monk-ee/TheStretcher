@@ -61,10 +61,10 @@ class TheStretcher:
         self.get_attached_volumes()
         self.snapshot_ebs_volume()
         self.check_snapshot_availability()
-        self.create_volume_from_snapshot()
-        self.check_volume_availability()
+        self.create_new_volume_from_snapshot()
+        self.check_new_volume_availability()
         self.detach_old_volume()
-        self.attach_volume_to_instance()
+        self.attach_new_volume_to_instance()
         self.delete_snapshot()
         self.delete_old_volume()
         self.start_instance()
@@ -134,16 +134,16 @@ class TheStretcher:
             except:
                 pass
 
-    def create_volume_from_snapshot(self):
+    def create_new_volume_from_snapshot(self):
          self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot)
 
-    def check_volume_availability(self):
+    def check_new_volume_availability(self):
         curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
         while curr_vol.status != 'available':
             time.sleep(10)
             curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
 
-    def attach_volume_to_instance(self):
+    def attach_new_volume_to_instance(self):
         self.conn.attach_volume (self.new_ebs.id, self.ec2_instance_id, self.disk_partition)
 
     def snapshot_ebs_volume(self):
