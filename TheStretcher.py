@@ -36,14 +36,37 @@ class TheStretcher:
     timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
     sns_stop = list()
     sns_start = list()
+    ec2_instance_id = ""
+    disk_partition = ""
+    disk_size = ""
+    old_ebs = ""
+    new_ebs = ""
+    snapshot = ""
+    instance = ""
 
-    def __init__(self,ec2_instance_id,disk_partition,disk_size):
+    def __init__(self,argv):
+        try:
+            self.ec2_instance_id = argv[1]
+            self.disk_partition = argv[2]
+            self.disk_size = argv[3]
+        except BaseException as emsg:
+            sys.exit("Missing arguments" + str(emsg))
+
         self.load_configuration()
         self.set_timezone()
         self.ec2_connect()
         self.sns_connect()
-
-        self.sns_message()
+        self.get_instance()
+        self.stop_instance()
+        self.get_attached_volumes()
+        self.snapshot_ebs_volume()
+        self.check_snapshot_availability()
+        self.create_volume_from_snapshot()
+        self.check_volume_availability()
+        self.attach_volume_to_instance()
+        self.delete_snapshot()
+        self.start_instance()
+        #self.sns_message()
 
     def load_configuration(self):
         try:
@@ -68,7 +91,6 @@ class TheStretcher:
     def ec2_connect(self):
         try:
             self.conn = boto.ec2.connect_to_region(self.config['general']['region'])
-            self.snsconn = boto.sns.connect_to_region(self.config['general']['region'])
         except:
             #done again
             exit("Failed to connect to EC2")
@@ -82,15 +104,19 @@ class TheStretcher:
             #no sns configured or some issue
             pass
 
-    def stop_instance(self, instance):
-        if instance.state == "running":
-            self.sns_stop.append(instance.id)
-            instance.stop()
+    def get_instance(self):
+        reservations = self.conn.get_all_instances(filters={'instance-id' : self.ec2_instance_id})
+        self.instance = reservations[0].instances[0]
 
-    def start_instance(self, instance):
-        if instance.state == "stopped":
-            self.sns_start.append(instance.id)
-            instance.start()
+    def stop_instance(self):
+        if self.instance.state == "running":
+            self.sns_stop.append(self.ec2_instance_id)
+            self.instance.stop()
+
+    def start_instance(self):
+        if self.instance.state == "stopped":
+            self.sns_start.append(self.ec2_instance_id)
+            self.instance.start()
 
     def sns_message(self):
         message = ""
@@ -106,8 +132,41 @@ class TheStretcher:
             except:
                 pass
 
+    def create_volume_from_snapshot(self):
+         self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['region'], self.snapshot)
+
+    def check_volume_availability(self):
+        curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
+        while curr_vol.status != 'available':
+            time.sleep(10)
+            curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
+
+    def attach_volume_to_instance(self):
+        self.conn.attach_volume (self.new_ebs.id, self.ec2_instance_id, self.disk_partition)
+
+    def snapshot_ebs_volume(self):
+        self.snapshot = self.conn.create_snapshot(self.old_ebs.id, 'TheStretcher Volume Snapshot')
+
+    def delete_snapshot(self):
+        self.conn.delete_snapshot(self.snapshot.id)
+
+    def check_snapshot_availability(self):
+        curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
+        while curr_snapshot.status != 'available':
+            time.sleep(10)
+            curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
+
+    def get_attached_volumes(self):
+        filters = {'attachment.instance-id': self.ec2_instance_id}
+        vols = self.conn.get_all_volumes(filters=filters)
+        for vol in vols:
+            print(vol.attach_data.device)
+            if vol.attach_data.device == self.disk_partition:
+                self.old_ebs = vol
+                return
+        exit("No volumes found matching that mount point.")
 
 if __name__ == "__main__":
-    ts = TheStretcher()
+    ts = TheStretcher(sys.argv)
 
 
