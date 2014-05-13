@@ -65,6 +65,7 @@ class TheStretcher:
         self.check_volume_availability()
         self.attach_volume_to_instance()
         self.delete_snapshot()
+        self.delete_old_volume()
         self.start_instance()
         #self.sns_message()
 
@@ -133,7 +134,7 @@ class TheStretcher:
                 pass
 
     def create_volume_from_snapshot(self):
-         self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['region'], self.snapshot)
+         self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot)
 
     def check_volume_availability(self):
         curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
@@ -150,9 +151,13 @@ class TheStretcher:
     def delete_snapshot(self):
         self.conn.delete_snapshot(self.snapshot.id)
 
+    def delete_old_volume(self):
+        self.conn.delete_volume(self.old_ebs.id)
+
     def check_snapshot_availability(self):
         curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
-        while curr_snapshot.status != 'available':
+        print(curr_snapshot.status)
+        while curr_snapshot.status != 'completed':
             time.sleep(10)
             curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
 
