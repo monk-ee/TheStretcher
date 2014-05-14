@@ -5,13 +5,9 @@ EBS Volume Stretcher for EC2 Instances
 
 Works for windows and Linux, but you will need to format it/extend it
 
-Params:
 
-+ instance id: a valid instance id
-+ device mount point: as per the console or reported by BlockDeviceMapping
-+ new disk size: in gigabytes
-
-Syntax:
+Syntax
+========
 
     usage: TheStretcher.py [-h] [-r] [-c] [-i IOPS]
                        instance disk_partition disk_size
@@ -28,3 +24,43 @@ Syntax:
         -r, --restart         Stop and restart the instance.
         -c, --cleanup         Delete all snapshots and volumes on completion.
         -i IOPS, --iops IOPS  Add provisioned IOPS to the new volume.
+
+Configuration
+==========
+Requires: your boto config file (~/.boto) to contain your aws credentials
+
+    [Credentials]
+    aws_access_key_id = <your access key>
+    aws_secret_access_key = <your secret key>
+
+ + You may need to change your region and timezone.
+
+
+Proxy
+==========
+You may need to add proxy information to your .boto file
+
+    [Boto]
+    debug = 0
+    num_retries = 10
+
+    proxy = myproxy.com
+    proxy_port = 8080
+
+
+SNS Topic
+==========
+You can configure an AWS SNS Topic, then you can publish to email or whatever.
+Add your Topic ARN to the config.yml and I am assuming you have setup the SNS Stuff.
+
+
+Dependencies
+==========
+ + PyYAML==3.10
+ + boto==2.27.0
+ + argparse==1.2.1
+
+
+Author
+==========
+Contact me on twitter @monkee_magic
