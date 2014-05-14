@@ -24,21 +24,18 @@ class TheStretcherTestCase(unittest.TestCase):
         pass
 
     def test_check_timezone_set(self):
-        ts = TheStretcher()
-        self.assertIn("TZ",os.environ)
+        self.assertIn("TZ", os.environ)
 
-        def test_check_timezone_value(self):
-        ts = TheStretcher()
-        self.assertEqual(os.environ["TZ"],"Australia/Brisbane")
+    def test_check_timezone_value(self):
+        self.assertEqual(os.environ["TZ"], "Australia/Brisbane")
 
     def test_check_timezone_notset(self):
-        self.assertNotIn("TZ",os.environ)
+        self.assertNotIn("TZ", os.environ)
 
     def test_stop_instance(self):
-        ts = TheStretcher()
-        self.assertRaises(Exception,ts.stop_instance)
+        self.assertRaises(Exception, self._client.stop_instance)
 
     def test_start_instance(self):
         ts = TheStretcher
-        self.assertRaises(Exception,ts.start_instance)
+        self.assertRaises(Exception,self._client.start_instance)
 

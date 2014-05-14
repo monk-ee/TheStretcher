@@ -5,19 +5,16 @@
 
 __author__ = "monkee"
 __license__ = "GPL"
-__version__ = "1.0.1"
+__version__ = "0.0.1"
 __maintainer__ = "monk-ee"
 __email__ = "magic.monkee.magic@gmail.com"
 __status__ = "Development"
 
 import unittest
-
-from TheStretcherTestCase import PuppetDBClientTestCaseV2
-from PuppetDBClientTestCaseV3 import PuppetDBClientTestCaseV3
+from TheStretcherTestCase import TheStretcherTestCase
 
 
 def all_tests():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(PuppetDBClientTestCaseV2))
-    suite.addTest(unittest.makeSuite(PuppetDBClientTestCaseV3))
+    suite.addTest(unittest.makeSuite(TheStretcherTestCase))
     return suite
