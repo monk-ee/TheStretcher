@@ -80,9 +80,9 @@ class TheStretcher(object):
 
     def load_configuration(self):
         try:
-            config_str = open(os.path.dirname(__file__) + '/config.yml', 'r')
+            config_str = open(os.path.dirname(os.path.abspath(__file__)) + '/config.yml', 'r')
             self.config = yaml.load(config_str)
-            logfile = os.path.dirname(__file__) + "/" + self.config['general']['logfile']
+            logfile = os.path.dirname(os.path.abspath(__file__)) + "/" + self.config['general']['logfile']
             logging.basicConfig(filename=logfile, level=logging.INFO)
         except IOError as error:
             exit("Could not load config.yml: " + str(error))
