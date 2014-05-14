@@ -45,7 +45,7 @@ class TheStretcher(object):
     snapshot = ""
     instance = ""
 
-    def __init__(self,arg):
+    def __init__(self, arg):
         try:
             self.ec2_instance_id = arg.instance
             self.disk_partition = arg.disk_partition
@@ -53,6 +53,7 @@ class TheStretcher(object):
             self.restart = arg.restart
             self.cleanup = arg.cleanup
             self.iops = arg.iops
+            self.dryrun =arg.dryrun
         except BaseException as emsg:
             sys.exit("Missing arguments" + str(emsg))
 
@@ -76,7 +77,8 @@ class TheStretcher(object):
             self.delete_old_volume()
         if self.restart:
             self.start_instance()
-        self.sns_message()
+        if not self.dryrun:
+            self.sns_message()
 
     def load_configuration(self):
         try:
@@ -160,9 +162,9 @@ class TheStretcher(object):
 
     def create_new_volume_from_snapshot(self):
         if self.iops is None:
-            self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot)
+            self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot,dry_run=self.dryrun)
         else:
-            self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot, 'io1', self.iops)
+            self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot, 'io1', self.iops,dry_run=self.dryrun)
 
     def check_new_volume_availability(self):
         curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
@@ -171,16 +173,16 @@ class TheStretcher(object):
             curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
 
     def attach_new_volume_to_instance(self):
-        self.conn.attach_volume(self.new_ebs.id, self.ec2_instance_id, self.disk_partition)
+        self.conn.attach_volume(self.new_ebs.id, self.ec2_instance_id, self.disk_partition,dry_run=self.dryrun)
 
     def snapshot_ebs_volume(self):
-        self.snapshot = self.conn.create_snapshot(self.old_ebs.id, 'TheStretcher Volume Snapshot')
+        self.snapshot = self.conn.create_snapshot(self.old_ebs.id, 'TheStretcher Volume Snapshot',dry_run=self.dryrun)
 
     def delete_snapshot(self):
-        self.conn.delete_snapshot(self.snapshot.id)
+        self.conn.delete_snapshot(self.snapshot.id,dry_run=self.dryrun)
 
     def delete_old_volume(self):
-        self.conn.delete_volume(self.old_ebs.id)
+        self.conn.delete_volume(self.old_ebs.id,dry_run=self.dryrun)
 
     def check_snapshot_availability(self):
         curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
@@ -189,7 +191,7 @@ class TheStretcher(object):
             curr_snapshot = self.conn.get_all_snapshots([self.snapshot.id])[0]
 
     def detach_old_volume(self):
-        self.conn.detach_volume(self.old_ebs.id, self.ec2_instance_id, self.disk_partition)
+        self.conn.detach_volume(self.old_ebs.id, self.ec2_instance_id, self.disk_partition,dry_run=self.dryrun)
 
     def get_attached_volumes(self):
         filters = {'attachment.instance-id': self.ec2_instance_id}
@@ -209,6 +211,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='A utility for stretching ec2 volumes with minimal effort.')
     parser.add_argument('-r', '--restart', action='store_true', default=False, help='Stop and restart the instance.')
     parser.add_argument('-c', '--cleanup', action='store_true', default=False, help='Delete all snapshots and volumes on completion.')
+    parser.add_argument('-d', '--dryrun', action='store_true', default=False, help='Fake runs for testing purposes.')
     parser.add_argument('-i', '--iops', type=int, help='Add provisioned IOPS to the new volume.')
     parser.add_argument('instance', help='An EC2 instance ID')
     parser.add_argument('disk_partition', help='The mount point eg. /dev/sdb')

@@ -22,6 +22,7 @@ class test_args(object):
     restart = True
     cleanup = True
     iops = 100
+    dryrun = True
 
     # The class "constructor" - It's actually an initializer
     def __init__(self):
