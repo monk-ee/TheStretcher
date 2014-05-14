@@ -20,9 +20,10 @@ __status__ = "Development"
 
 import boto.ec2, boto.sns
 import yaml, sys,logging,time,os,re
+import argparse
 
 
-class TheStretcher:
+class TheStretcher(object):
     """
     Stretches an ebs volume attached to an instance and cleans up after itself
 
@@ -44,13 +45,14 @@ class TheStretcher:
     snapshot = ""
     instance = ""
 
-    def __init__(self,argv):
+    def __init__(self,arg):
         try:
-            self.ec2_instance_id = argv[1]
-            self.disk_partition = argv[2]
-            self.disk_size = argv[3]
+            self.ec2_instance_id = arg.instance
+            self.disk_partition = arg.disk_partition
+            self.disk_size = arg.disk_size
         except BaseException as emsg:
             sys.exit("Missing arguments" + str(emsg))
+
         self.check_arguments()
         self.load_configuration()
         self.set_timezone()
@@ -195,6 +197,13 @@ class TheStretcher:
         time.sleep(15)
 
 if __name__ == "__main__":
-    ts = TheStretcher(sys.argv)
+    #grab the arguments when the script is ran
+    parser = argparse.ArgumentParser(description='A utility for stretching ec2 volumes with minimal effort.')
+    parser.add_argument('instance', help='An EC2 instance ID')
+    parser.add_argument('disk_partition', help='The mount point eg. /dev/sdb')
+    parser.add_argument('disk_size', help='The new disk size in GB.')
+    args = parser.parse_args()
+
+    ts = TheStretcher(args)
 
 
