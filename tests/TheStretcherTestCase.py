@@ -12,11 +12,8 @@ __status__ = "Development"
 
 
 import unittest
-from mock import MagicMock, patch
-import requests
+import os
 from TheStretcher import TheStretcher
-import json
-import helpers
 
 
 class TheStretcherTestCase(unittest.TestCase):
@@ -26,15 +23,22 @@ class TheStretcherTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @patch('puppetdb.utils.api_request')
-    def test_get_nodes(self, get):
-        get.side_effect = helpers.mock_api_request
-        resp = self._client.get_nodes()
-        self.assertEqual(len(resp), 2)
-        node_0 = resp[0]
-        self.assertTrue(node_0.has_key('name'))
-        self.assertEqual(node_0.get('name'), 'host1')
-        node_1 = resp[1]
-        self.assertTrue(node_1.has_key('name'))
-        self.assertEqual(node_1.get('name'), 'host2')
+    def test_check_timezone_set(self):
+        ts = TheStretcher()
+        self.assertIn("TZ",os.environ)
+
+        def test_check_timezone_value(self):
+        ts = TheStretcher()
+        self.assertEqual(os.environ["TZ"],"Australia/Brisbane")
+
+    def test_check_timezone_notset(self):
+        self.assertNotIn("TZ",os.environ)
+
+    def test_stop_instance(self):
+        ts = TheStretcher()
+        self.assertRaises(Exception,ts.stop_instance)
+
+    def test_start_instance(self):
+        ts = TheStretcher
+        self.assertRaises(Exception,ts.start_instance)
 
