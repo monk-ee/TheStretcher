@@ -36,14 +36,8 @@ class TheStretcherTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_check_timezone_set(self):
-        self.assertIn("TZ", os.environ)
-
     def test_check_timezone_value(self):
         self.assertEqual(os.environ["TZ"], "Australia/Brisbane")
-
-    def test_check_timezone_notset(self):
-        self.assertNotIn("TZ", os.environ)
 
     def test_stop_instance(self):
         self.assertRaises(Exception, self._client.stop_instance)
