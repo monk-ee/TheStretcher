@@ -50,6 +50,9 @@ class TheStretcher(object):
             self.ec2_instance_id = arg.instance
             self.disk_partition = arg.disk_partition
             self.disk_size = arg.disk_size
+            self.restart = arg.restart
+            self.cleanup = arg.cleanup
+            self.iops = arg.iops
         except BaseException as emsg:
             sys.exit("Missing arguments" + str(emsg))
 
@@ -68,9 +71,11 @@ class TheStretcher(object):
         self.detach_old_volume()
         self.check_detached_old_volume()
         self.attach_new_volume_to_instance()
-        self.delete_snapshot()
-        self.delete_old_volume()
-        self.start_instance()
+        if self.cleanup:
+            self.delete_snapshot()
+            self.delete_old_volume()
+        if self.restart:
+            self.start_instance()
         self.sns_message()
 
     def load_configuration(self):
@@ -98,6 +103,7 @@ class TheStretcher(object):
                 exit("Disk size needs to be a whole number (in GB).")
         except:
              exit("Disk size needs to be an integer (in GB).")
+        exit("dont go")
 
     def set_timezone(self):
         try:
@@ -154,7 +160,10 @@ class TheStretcher(object):
                 pass
 
     def create_new_volume_from_snapshot(self):
-         self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot)
+        if self.iops is None:
+            self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot)
+        else:
+            self.new_ebs = self.conn.create_volume(self.disk_size, self.config['general']['zone'], self.snapshot, 'io1', self.iops)
 
     def check_new_volume_availability(self):
         curr_vol = self.conn.get_all_volumes([self.new_ebs.id])[0]
@@ -199,9 +208,14 @@ class TheStretcher(object):
 if __name__ == "__main__":
     #grab the arguments when the script is ran
     parser = argparse.ArgumentParser(description='A utility for stretching ec2 volumes with minimal effort.')
+    parser.add_argument('-r', '--restart', action='store_true', default=False, help='Stop and restart the instance.')
+    parser.add_argument('-c', '--cleanup', action='store_true', default=False, help='Delete all snapshots and volumes on completion.')
+    parser.add_argument('-i', '--iops', type=int, help='Add provisioned IOPS to the new volume.')
     parser.add_argument('instance', help='An EC2 instance ID')
     parser.add_argument('disk_partition', help='The mount point eg. /dev/sdb')
     parser.add_argument('disk_size', help='The new disk size in GB.')
+
+
     args = parser.parse_args()
 
     ts = TheStretcher(args)
