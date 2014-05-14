@@ -60,24 +60,24 @@ class TheStretcher(object):
         self.check_arguments()
         self.load_configuration()
         self.set_timezone()
-        self.ec2_connect()
-        self.sns_connect()
-        self.get_instance()
-        self.stop_instance()
-        self.get_attached_volumes()
-        self.snapshot_ebs_volume()
-        self.check_snapshot_availability()
-        self.create_new_volume_from_snapshot()
-        self.check_new_volume_availability()
-        self.detach_old_volume()
-        self.check_detached_old_volume()
-        self.attach_new_volume_to_instance()
-        if self.cleanup:
-            self.delete_snapshot()
-            self.delete_old_volume()
-        if self.restart:
-            self.start_instance()
         if not self.dryrun:
+            self.ec2_connect()
+            self.sns_connect()
+            self.get_instance()
+            self.stop_instance()
+            self.get_attached_volumes()
+            self.snapshot_ebs_volume()
+            self.check_snapshot_availability()
+            self.create_new_volume_from_snapshot()
+            self.check_new_volume_availability()
+            self.detach_old_volume()
+            self.check_detached_old_volume()
+            self.attach_new_volume_to_instance()
+            if self.cleanup:
+                self.delete_snapshot()
+                self.delete_old_volume()
+            if self.restart:
+                self.start_instance()
             self.sns_message()
 
     def load_configuration(self):
