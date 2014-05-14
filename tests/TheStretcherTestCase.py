@@ -15,10 +15,22 @@ import unittest
 import os
 from TheStretcher import TheStretcher
 
+class test_args(object):
+    instance = "i-7244af4c"
+    disk_partition = "/dev/sdb"
+    disk_size = 100
+    restart = True
+    cleanup = True
+    iops = 100
+
+    # The class "constructor" - It's actually an initializer
+    def __init__(self):
+        pass
 
 class TheStretcherTestCase(unittest.TestCase):
     def setUp(self):
-        self._client = TheStretcher()
+        args = test_args()
+        self._client = TheStretcher(args)
 
     def tearDown(self):
         pass
