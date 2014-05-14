@@ -35,7 +35,6 @@ Requires: your boto config file (~/.boto) to contain your aws credentials
 
  + You may need to change your region and timezone.
 
-
 Proxy
 ==========
 You may need to add proxy information to your .boto file
@@ -47,12 +46,10 @@ You may need to add proxy information to your .boto file
     proxy = myproxy.com
     proxy_port = 8080
 
-
 SNS Topic
 ==========
 You can configure an AWS SNS Topic, then you can publish to email or whatever.
 Add your Topic ARN to the config.yml and I am assuming you have setup the SNS Stuff.
-
 
 Dependencies
 ==========

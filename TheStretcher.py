@@ -103,7 +103,6 @@ class TheStretcher(object):
                 exit("Disk size needs to be a whole number (in GB).")
         except:
              exit("Disk size needs to be an integer (in GB).")
-        exit("dont go")
 
     def set_timezone(self):
         try:
@@ -214,10 +213,7 @@ if __name__ == "__main__":
     parser.add_argument('instance', help='An EC2 instance ID')
     parser.add_argument('disk_partition', help='The mount point eg. /dev/sdb')
     parser.add_argument('disk_size', help='The new disk size in GB.')
-
-
     args = parser.parse_args()
-
     ts = TheStretcher(args)
 
 
