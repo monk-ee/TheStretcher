@@ -5,6 +5,8 @@ EBS Volume Stretcher for EC2 Instances
 
 Works for windows and Linux, but you will need to format it/extend it
 
+[![Build Status](https://travis-ci.org/monk-ee/TheStretcher.png?branch=master)](https://travis-ci.org/monk-ee/TheStretcher)
+
 
 Syntax
 ========
